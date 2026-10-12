@@ -14,6 +14,7 @@ import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as LabRouteImport } from './routes/lab'
 import { Route as NotesRouteImport } from './routes/notes'
+import { Route as PapersRouteImport } from './routes/papers'
 import { Route as ParentsRouteImport } from './routes/parents'
 import { Route as PracticeRouteImport } from './routes/practice'
 import { Route as PyqsRouteImport } from './routes/pyqs'
@@ -44,6 +45,11 @@ const LabRoute = LabRouteImport.update({
 const NotesRoute = NotesRouteImport.update({
   id: '/notes',
   path: '/notes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PapersRoute = PapersRouteImport.update({
+  id: '/papers',
+  path: '/papers',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ParentsRoute = ParentsRouteImport.update({
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/lab': typeof LabRoute
   '/notes': typeof NotesRoute
+  '/papers': typeof PapersRoute
   '/parents': typeof ParentsRoute
   '/practice': typeof PracticeRoute
   '/pyqs': typeof PyqsRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/lab': typeof LabRoute
   '/notes': typeof NotesRoute
+  '/papers': typeof PapersRoute
   '/parents': typeof ParentsRoute
   '/practice': typeof PracticeRoute
   '/pyqs': typeof PyqsRoute
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/lab': typeof LabRoute
   '/notes': typeof NotesRoute
+  '/papers': typeof PapersRoute
   '/parents': typeof ParentsRoute
   '/practice': typeof PracticeRoute
   '/pyqs': typeof PyqsRoute
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/lab'
     | '/notes'
+    | '/papers'
     | '/parents'
     | '/practice'
     | '/pyqs'
@@ -138,6 +148,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/lab'
     | '/notes'
+    | '/papers'
     | '/parents'
     | '/practice'
     | '/pyqs'
@@ -151,6 +162,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/lab'
     | '/notes'
+    | '/papers'
     | '/parents'
     | '/practice'
     | '/pyqs'
@@ -165,6 +177,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   LabRoute: typeof LabRoute
   NotesRoute: typeof NotesRoute
+  PapersRoute: typeof PapersRoute
   ParentsRoute: typeof ParentsRoute
   PracticeRoute: typeof PracticeRoute
   PyqsRoute: typeof PyqsRoute
@@ -208,6 +221,13 @@ declare module '@tanstack/react-router' {
       path: '/notes'
       fullPath: '/notes'
       preLoaderRoute: typeof NotesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/papers': {
+      id: '/papers'
+      path: '/papers'
+      fullPath: '/papers'
+      preLoaderRoute: typeof PapersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/parents': {
@@ -261,6 +281,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   LabRoute: LabRoute,
   NotesRoute: NotesRoute,
+  PapersRoute: PapersRoute,
   ParentsRoute: ParentsRoute,
   PracticeRoute: PracticeRoute,
   PyqsRoute: PyqsRoute,

@@ -39,7 +39,7 @@ function build(): CbsePaper[] {
             id: `${std}-${slug(subject)}-${year}-set${i + 1}`,
             standard: std, subject, year, type: "Board Paper", set,
             paperUrl: `${BASE}/QuestionPaper/Class${roman}_${year}/${slug(subject)}_Set${i + 1}.pdf`,
-            solutionUrl: i < 2 ? `${BASE}/MarkingScheme/Class${roman}_${year}/${slug(subject)}_Set${i + 1}_MS.pdf` : undefined,
+            ...(i < 2 ? { solutionUrl: `${BASE}/MarkingScheme/Class${roman}_${year}/${slug(subject)}_Set${i + 1}_MS.pdf` } : {}),
           });
         });
       });

@@ -84,7 +84,7 @@ function Papers() {
             <div className="mt-4 flex flex-wrap gap-2">
               <button onClick={() => setView({ paper: p, mode: "paper" })} className={`${btn} bg-gradient-brand text-on-brand`}>View Paper</button>
               <button disabled={!p.solutionUrl} onClick={() => setView({ paper: p, mode: "solution" })} className={`${btn} glass-soft hover:bg-card disabled:opacity-40`}>{p.solutionUrl ? "Marking Scheme / Solution" : "No solution yet"}</button>
-              <a href={p.paperUrl} download className={`${btn} glass-soft hover:bg-card`}>Download PDF</a>
+              <a href={p.paperUrl} target="_blank" rel="noopener noreferrer" download className={`${btn} glass-soft hover:bg-card`}>Download PDF</a>
             </div>
           </div>
         ))}
@@ -120,7 +120,11 @@ function Reader({ view, setView }: { view: View; setView: (v: View | null) => vo
           <button onClick={fs} className="glass-soft rounded-full px-3 py-1.5 text-xs font-semibold" aria-label="Full screen">⛶ Full screen</button>
           <button onClick={() => setView(null)} className="glass-soft rounded-full px-3 py-1.5 text-xs font-semibold" aria-label="Close">✕ Close</button>
         </div>
-        <iframe key={url} title="PDF viewer" src={`https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`} className="h-[80vh] w-full rounded-lg bg-card" />
+        <p className="text-xs text-muted-foreground">
+          If the preview doesn't load immediately,{" "}
+          <a href={url} target="_blank" rel="noopener noreferrer" className="font-semibold text-brand underline underline-offset-2">Click to Open in Clean Tab</a>
+        </p>
+        <iframe key={url} title={paper.subject} src={`https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`} className="h-[80vh] w-full rounded-lg border-0 bg-card" />
       </div>
     </div>
   );

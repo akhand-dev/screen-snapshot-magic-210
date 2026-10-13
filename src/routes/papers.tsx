@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { CBSE_PAPERS, SUBJECTS_BY_CLASS, YEARS, type CbsePaper } from "@/data/cbsePapers";
 import { Page, Chip } from "@/components/site";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/papers")({
   head: () => ({
@@ -24,8 +25,20 @@ function Papers() {
   const [type, setType] = useState<"Board Paper" | "SQP">("Board Paper");
   const [q, setQ] = useState("");
   const [view, setView] = useState<View | null>(null);
+  const [papers, setPapers] = useState<CbsePaper[] | null>(null);
 
-  const rows = CBSE_PAPERS.filter((p) =>
+  useEffect(() => {
+    supabase.from("cbse_pyqs").select("*").then(({ data, error }) => {
+      if (error || !data) { setPapers(CBSE_PAPERS); return; }
+      setPapers(data.map((r) => ({
+        id: r.id, standard: r.standard as "10" | "12", subject: r.subject, year: r.year,
+        type: (r.paper_type === "SQP" ? "SQP" : "Board Paper") as CbsePaper["type"],
+        set: r.set_number ?? undefined, paperUrl: r.paper_url, solutionUrl: r.solution_url ?? undefined,
+      })));
+    });
+  }, []);
+
+  const rows = (papers ?? []).filter((p) =>
     p.standard === std && p.type === type &&
     (subject === "All" || p.subject === subject) &&
     (year === "All" || p.year === year) &&

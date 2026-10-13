@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { PaperReader } from "@/components/PaperReader";
 import { CBSE_PAPERS, SUBJECTS_BY_CLASS, YEARS, type CbsePaper } from "@/data/cbsePapers";
 import { Page, Chip } from "@/components/site";
 import { supabase } from "@/integrations/supabase/client";
@@ -91,41 +92,8 @@ function Papers() {
         {rows.length === 0 && <p className="text-muted-foreground">No matching papers.</p>}
       </div>
 
-      {view && <Reader view={view} setView={setView} />}
+      {view && <PaperReader paper={view.paper} initial={view.mode} onClose={() => setView(null)} />}
     </Page>
   );
 }
 
-function Reader({ view, setView }: { view: View; setView: (v: View | null) => void }) {
-  const box = useRef<HTMLDivElement>(null);
-  const { paper, mode } = view;
-  const url = mode === "solution" && paper.solutionUrl ? paper.solutionUrl : paper.paperUrl;
-  useEffect(() => {
-    const k = (e: KeyboardEvent) => e.key === "Escape" && setView(null);
-    window.addEventListener("keydown", k);
-    return () => window.removeEventListener("keydown", k);
-  }, [setView]);
-  const fs = () => (document.fullscreenElement ? document.exitFullscreen() : box.current?.requestFullscreen());
-  const tab = (on: boolean) => `rounded-full px-4 py-1.5 text-xs font-semibold ${on ? "bg-brand text-on-brand" : "hover:bg-accent"}`;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/50 p-4 backdrop-blur-sm" onClick={() => setView(null)}>
-      <div ref={box} onClick={(e) => e.stopPropagation()} className="flex w-full max-w-5xl flex-col gap-3 rounded-3xl bg-background p-4 shadow-2xl">
-        <div className="flex flex-wrap items-center gap-2">
-          <p className="mr-auto font-semibold">Class {paper.standard} · {paper.subject} · {paper.year}{paper.set ? ` · ${paper.set}` : ""}</p>
-          <div className="glass-soft flex rounded-full p-1">
-            <button className={tab(mode === "paper")} onClick={() => setView({ paper, mode: "paper" })}>Question Paper</button>
-            <button disabled={!paper.solutionUrl} className={`${tab(mode === "solution")} disabled:opacity-40`} onClick={() => setView({ paper, mode: "solution" })}>Marking Scheme</button>
-          </div>
-          <button onClick={fs} className="glass-soft rounded-full px-3 py-1.5 text-xs font-semibold" aria-label="Full screen">⛶ Full screen</button>
-          <button onClick={() => setView(null)} className="glass-soft rounded-full px-3 py-1.5 text-xs font-semibold" aria-label="Close">✕ Close</button>
-        </div>
-        <p className="text-xs text-muted-foreground">
-          If the preview doesn't load immediately,{" "}
-          <a href={url} target="_blank" rel="noopener noreferrer" className="font-semibold text-brand underline underline-offset-2">Click to Open in Clean Tab</a>
-        </p>
-        <iframe key={url} title={paper.subject} src={`https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`} className="h-[80vh] w-full rounded-lg border-0 bg-card" />
-      </div>
-    </div>
-  );
-}

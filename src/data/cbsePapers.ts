@@ -6,9 +6,9 @@ export type CbsePaper = {
   subject: string;
   year: string;
   type: "Board Paper" | "SQP";
-  set?: string;
+  set?: string | undefined;
   paperUrl: string;
-  solutionUrl?: string;
+  solutionUrl?: string | undefined;
 };
 
 export const SUBJECTS_BY_CLASS: Record<"10" | "12", string[]> = {

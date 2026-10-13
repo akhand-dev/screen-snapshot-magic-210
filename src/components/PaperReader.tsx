@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export type ReaderPaper = { standard: string; subject: string; year: string; set?: string; paperUrl: string; solutionUrl?: string };
+export type ReaderPaper = { standard: string; subject: string; year: string; set?: string | undefined; paperUrl: string; solutionUrl?: string | undefined };
 
 export function PaperReader({ paper, initial = "paper", onClose }: { paper: ReaderPaper; initial?: "paper" | "solution"; onClose: () => void }) {
   const [mode, setMode] = useState(initial);

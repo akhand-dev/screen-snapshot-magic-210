@@ -14,7 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      cbse_pyqs: {
+        Row: {
+          created_at: string
+          id: string
+          paper_type: string
+          paper_url: string
+          set_number: string | null
+          solution_url: string | null
+          standard: string
+          subject: string
+          year: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          paper_type?: string
+          paper_url: string
+          set_number?: string | null
+          solution_url?: string | null
+          standard: string
+          subject: string
+          year: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          paper_type?: string
+          paper_url?: string
+          set_number?: string | null
+          solution_url?: string | null
+          standard?: string
+          subject?: string
+          year?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

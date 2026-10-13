@@ -13,6 +13,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Header, Footer } from "@/components/site";
+import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -90,6 +91,7 @@ function RootComponent() {
         </div>
         <Header />
         <Outlet />
+        <Toaster />
         <Footer />
       </div>
     </QueryClientProvider>

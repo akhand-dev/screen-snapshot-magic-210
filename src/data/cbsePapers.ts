@@ -12,8 +12,27 @@ export type CbsePaper = {
 };
 
 export const SUBJECTS_BY_CLASS: Record<"10" | "12", string[]> = {
-  "10": ["Mathematics (Standard)", "Mathematics (Basic)", "Science", "Social Science", "English (Lang & Lit)", "Hindi (Course A)", "Hindi (Course B)", "Information Technology (402)"],
-  "12": ["Physics", "Chemistry", "Mathematics", "Biology", "Computer Science", "English Core", "Accountancy", "Economics", "Business Studies"],
+  "10": [
+    "Mathematics (Standard)",
+    "Mathematics (Basic)",
+    "Science",
+    "Social Science",
+    "English (Lang & Lit)",
+    "Hindi (Course A)",
+    "Hindi (Course B)",
+    "Information Technology (402)",
+  ],
+  "12": [
+    "Physics",
+    "Chemistry",
+    "Mathematics",
+    "Biology",
+    "Computer Science",
+    "English Core",
+    "Accountancy",
+    "Economics",
+    "Business Studies",
+  ],
 };
 
 export const YEARS = ["2021", "2022", "2023", "2024", "2025"];
@@ -30,16 +49,27 @@ function build(): CbsePaper[] {
         const session = `${Number(year) - 1}_${year.slice(2)}`;
         out.push({
           id: `${std}-${slug(subject)}-${year}-sqp`,
-          standard: std, subject, year, type: "SQP",
+          standard: std,
+          subject,
+          year,
+          type: "SQP",
           paperUrl: `${BASE}/SQP/Class${roman}_${session}/${slug(subject)}-SQP.pdf`,
           solutionUrl: `${BASE}/SQP/Class${roman}_${session}/${slug(subject)}-MS.pdf`,
         });
         ["Set 1", "Set 2", "Set 3"].forEach((set, i) => {
           out.push({
             id: `${std}-${slug(subject)}-${year}-set${i + 1}`,
-            standard: std, subject, year, type: "Board Paper", set,
+            standard: std,
+            subject,
+            year,
+            type: "Board Paper",
+            set,
             paperUrl: `${BASE}/QuestionPaper/Class${roman}_${year}/${slug(subject)}_Set${i + 1}.pdf`,
-            ...(i < 2 ? { solutionUrl: `${BASE}/MarkingScheme/Class${roman}_${year}/${slug(subject)}_Set${i + 1}_MS.pdf` } : {}),
+            ...(i < 2
+              ? {
+                  solutionUrl: `${BASE}/MarkingScheme/Class${roman}_${year}/${slug(subject)}_Set${i + 1}_MS.pdf`,
+                }
+              : {}),
           });
         });
       });

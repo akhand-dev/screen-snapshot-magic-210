@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 const NAV = [
   { to: "/", label: "Home" },
@@ -25,6 +26,8 @@ export function Logo() {
 
 export function Header() {
   const [open, setOpen] = useState(false);
+  const { user, signIn, signOut, loading } = useAuth();
+
   return (
     <header className="sticky top-4 z-30 mx-auto max-w-6xl px-4">
       <nav className="glass flex items-center justify-between rounded-full px-5 py-3">
@@ -45,6 +48,41 @@ export function Header() {
           ))}
         </div>
         <div className="flex items-center gap-2">
+          {!loading && (
+            <>
+              {user ? (
+                <div className="flex items-center gap-2">
+                  <span className="hidden text-xs font-semibold sm:inline text-muted-foreground max-w-[120px] truncate">
+                    {user.displayName || user.email?.split("@")[0]}
+                  </span>
+                  {user.photoURL ? (
+                    <img
+                      src={user.photoURL}
+                      alt="Avatar"
+                      className="size-7 rounded-full border border-border"
+                    />
+                  ) : (
+                    <div className="grid size-7 place-items-center rounded-full bg-brand text-xs font-semibold text-on-brand">
+                      {(user.displayName || user.email || "U")[0]?.toUpperCase()}
+                    </div>
+                  )}
+                  <button
+                    onClick={() => signOut()}
+                    className="rounded-full glass-soft px-3 py-1.5 text-xs font-semibold hover:bg-card transition"
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => signIn()}
+                  className="rounded-full glass-soft px-4 py-2 text-xs font-semibold hover:bg-card transition"
+                >
+                  Sign In
+                </button>
+              )}
+            </>
+          )}
           <Link
             to="/dashboard"
             className="rounded-full bg-gradient-brand px-5 py-2 text-sm font-semibold text-on-brand shadow-lg shadow-brand/30"

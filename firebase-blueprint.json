@@ -1,0 +1,98 @@
+{
+  "entities": {
+    "CbsePyq": {
+      "title": "CbsePyq",
+      "description": "CBSE Previous Year Questions and Sample Question Papers",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of the paper"
+        },
+        "standard": {
+          "type": "string",
+          "enum": ["10", "12"],
+          "description": "Class standard"
+        },
+        "subject": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Subject name"
+        },
+        "year": {
+          "type": "string",
+          "pattern": "^\\d{4}$",
+          "description": "4-digit examination year"
+        },
+        "paper_type": {
+          "type": "string",
+          "enum": ["Board Paper", "SQP"],
+          "description": "Paper category"
+        },
+        "set_number": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Set or code"
+        },
+        "paper_url": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "Direct URL to question paper PDF"
+        },
+        "solution_url": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "Direct URL to marking scheme or solution PDF"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp"
+        }
+      },
+      "required": ["standard", "subject", "year", "paper_type", "paper_url"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User account profile information",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Auth UID"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "User email address"
+        },
+        "displayName": {
+          "type": "string",
+          "maxLength": 120,
+          "description": "User display name"
+        },
+        "photoURL": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "Profile picture URL"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Account creation timestamp"
+        }
+      },
+      "required": ["uid", "email"]
+    }
+  },
+  "firestore": {
+    "/cbse_pyqs/{paperId}": {
+      "schema": "CbsePyq",
+      "description": "Collection of CBSE past papers and sample question papers"
+    },
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile information"
+    }
+  }
+}

@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 import { PaperReader } from "@/components/PaperReader";
 import { CBSE_PAPERS, SUBJECTS_BY_CLASS, YEARS, type CbsePaper } from "@/data/cbsePapers";
 import { Page, Chip } from "@/components/site";
-import { supabase } from "@/integrations/supabase/client";
 import { AdsterraBanner } from "@/components/AdsterraBanner";
+import { db } from "@/lib/firebase";
+import { collection, getDocs, query, orderBy } from "firebase/firestore";
 
 export const Route = createFileRoute("/papers")({
   head: () => ({
@@ -38,26 +39,34 @@ function Papers() {
   const [papers, setPapers] = useState<CbsePaper[] | null>(null);
 
   useEffect(() => {
-    supabase
-      .from("cbse_pyqs")
-      .select("*")
-      .then(({ data, error }) => {
-        if (error || !data || data.length === 0) {
+    async function fetchPapers() {
+      try {
+        const qPapers = query(collection(db, "cbse_pyqs"), orderBy("year", "desc"));
+        const snapshot = await getDocs(qPapers);
+        if (snapshot.empty) {
           setPapers(CBSE_PAPERS);
           return;
         }
-        const customPapers: CbsePaper[] = data.map((r) => ({
-          id: r.id,
-          standard: r.standard as "10" | "12",
-          subject: r.subject,
-          year: r.year,
-          type: (r.paper_type === "SQP" ? "SQP" : "Board Paper") as CbsePaper["type"],
-          set: r.set_number ?? undefined,
-          paperUrl: r.paper_url,
-          solutionUrl: r.solution_url ?? undefined,
-        }));
+        const customPapers: CbsePaper[] = snapshot.docs.map((docSnap) => {
+          const r = docSnap.data();
+          return {
+            id: docSnap.id,
+            standard: (r["standard"] || "10") as "10" | "12",
+            subject: String(r["subject"] || ""),
+            year: String(r["year"] || ""),
+            type: (r["paper_type"] === "SQP" ? "SQP" : "Board Paper") as CbsePaper["type"],
+            set: r["set_number"] ? String(r["set_number"]) : undefined,
+            paperUrl: String(r["paper_url"] || ""),
+            solutionUrl: r["solution_url"] ? String(r["solution_url"]) : undefined,
+          };
+        });
         setPapers([...customPapers, ...CBSE_PAPERS]);
-      });
+      } catch (err) {
+        console.warn("Firestore fetch error, loading bundled CBSE papers:", err);
+        setPapers(CBSE_PAPERS);
+      }
+    }
+    fetchPapers();
   }, []);
 
   const rows = (papers ?? [])

@@ -23,55 +23,24 @@ const AD_CONFIGS = {
   },
 } as const;
 
-function buildAdDoc(cfg: (typeof AD_CONFIGS)["320x50"] | (typeof AD_CONFIGS)["728x90"]) {
-  return `<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>
-      * { box-sizing: border-box; }
-      body {
-        margin: 0;
-        padding: 0;
-        background: transparent;
-        overflow: hidden;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: ${cfg.width}px;
-        height: ${cfg.height}px;
-      }
-    </style>
-  </head>
-  <body>
-    <script type="text/javascript">
-      atOptions = {
-        'key' : '${cfg.key}',
-        'format' : 'iframe',
-        'height' : ${cfg.height},
-        'width' : ${cfg.width},
-        'params' : {}
-      };
-    </script>
-    <script type="text/javascript" src="${cfg.scriptUrl}"></script>
-  </body>
-</html>`;
-}
-
 export function AdsterraBanner({
   className = "",
   showLabel = true,
   size = "auto",
 }: AdsterraBannerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const adSlotRef = useRef<HTMLDivElement>(null);
+
   const [resolvedSize, setResolvedSize] = useState<"320x50" | "728x90">(() => {
     if (size !== "auto") return size;
     if (typeof window !== "undefined" && window.innerWidth < 768) return "320x50";
     return "728x90";
   });
-  const [scale, setScale] = useState(1);
 
+  const [scale, setScale] = useState(1);
+  const [isBlocked, setIsBlocked] = useState(false);
+
+  // Responsive size determination
   useEffect(() => {
     const handleResize = () => {
       if (!containerRef.current) return;
@@ -100,7 +69,54 @@ export function AdsterraBanner({
   }, [size]);
 
   const cfg = AD_CONFIGS[resolvedSize];
-  const srcDoc = buildAdDoc(cfg);
+
+  // Dynamic React useEffect script injection
+  useEffect(() => {
+    const slot = adSlotRef.current;
+    if (!slot) return;
+
+    // Reset slot and state on size change / mount
+    slot.innerHTML = "";
+    setIsBlocked(false);
+
+    try {
+      // 1. Create config script that assigns atOptions
+      const confScript = document.createElement("script");
+      confScript.type = "text/javascript";
+      confScript.text = `atOptions = {
+        'key' : '${cfg.key}',
+        'format' : 'iframe',
+        'height' : ${cfg.height},
+        'width' : ${cfg.width},
+        'params' : {}
+      };`;
+
+      // 2. Create the external invoke.js script
+      const invokeScript = document.createElement("script");
+      invokeScript.type = "text/javascript";
+      invokeScript.src = cfg.scriptUrl;
+      invokeScript.async = true;
+
+      invokeScript.onerror = () => {
+        console.warn(
+          `[Adsterra] Ad script failed to load or was blocked by an ad-blocker: ${cfg.scriptUrl}`,
+        );
+        setIsBlocked(true);
+      };
+
+      // Append scripts sequentially into the slot container
+      slot.appendChild(confScript);
+      slot.appendChild(invokeScript);
+    } catch (err) {
+      console.error("[Adsterra] Injection error:", err);
+    }
+
+    return () => {
+      if (slot) {
+        slot.innerHTML = "";
+      }
+    };
+  }, [resolvedSize, cfg.key, cfg.height, cfg.width, cfg.scriptUrl]);
 
   const containerWidth = scale < 1 ? Math.round(cfg.width * scale) : cfg.width + 16;
   const containerHeight = scale < 1 ? Math.round(cfg.height * scale + 10) : cfg.height + 14;
@@ -115,33 +131,40 @@ export function AdsterraBanner({
           Advertisement ({cfg.width}×{cfg.height})
         </span>
       )}
+
       <div
-        className="glass-soft flex items-center justify-center overflow-hidden rounded-2xl border border-border/50 p-1.5 shadow-sm transition-all"
+        className="glass-soft relative flex items-center justify-center overflow-hidden rounded-2xl border border-border/50 p-1.5 shadow-sm transition-all"
         style={{
           width: `${containerWidth}px`,
           maxWidth: "100%",
-          height: `${containerHeight}px`,
+          minHeight: `${containerHeight}px`,
         }}
       >
         <div
           style={{
             width: `${cfg.width}px`,
-            height: `${cfg.height}px`,
+            minHeight: `${cfg.height}px`,
             transform: `scale(${scale})`,
             transformOrigin: "center center",
           }}
           className="flex items-center justify-center"
         >
-          <iframe
-            key={`${cfg.key}-${resolvedSize}`}
-            title={`Advertisement ${cfg.width}x${cfg.height}`}
-            width={cfg.width}
-            height={cfg.height}
-            srcDoc={srcDoc}
-            className="border-0 overflow-hidden"
-            scrolling="no"
+          {/* Managed by useEffect - React does not reconcile children of this element */}
+          <div
+            ref={adSlotRef}
+            className="flex items-center justify-center overflow-hidden"
+            style={{ width: `${cfg.width}px`, minHeight: `${cfg.height}px` }}
           />
         </div>
+
+        {isBlocked && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-card/90 p-2 text-center backdrop-blur-xs">
+            <span className="text-xs font-semibold text-amber">Ad Blocker Detected</span>
+            <p className="mt-0.5 text-[11px] text-muted-foreground">
+              highrevenueformat.com was blocked by your browser extension or Brave Shields.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

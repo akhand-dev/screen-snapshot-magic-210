@@ -1,0 +1,71 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net: default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidCbsePyq(data) {
+      return data.keys().hasAll(['standard', 'subject', 'year', 'paper_type', 'paper_url']) &&
+             data.keys().hasOnly(['id', 'standard', 'subject', 'year', 'paper_type', 'set_number', 'paper_url', 'solution_url', 'created_at']) &&
+             data.standard in ['10', '12'] &&
+             data.subject is string && data.subject.size() > 0 && data.subject.size() <= 100 &&
+             data.year is string && data.year.matches('^\\d{4}$') &&
+             data.paper_type in ['Board Paper', 'SQP'] &&
+             data.paper_url is string && data.paper_url.size() <= 1000 &&
+             (!('set_number' in data) || data.set_number == null || (data.set_number is string && data.set_number.size() <= 50)) &&
+             (!('solution_url' in data) || data.solution_url == null || (data.solution_url is string && data.solution_url.size() <= 1000));
+    }
+
+    function isValidUserProfile(data) {
+      return data.keys().hasAll(['uid', 'email']) &&
+             data.keys().hasOnly(['uid', 'email', 'displayName', 'photoURL', 'createdAt']) &&
+             data.uid == request.auth.uid &&
+             data.email is string && data.email.size() <= 150 &&
+             (!('displayName' in data) || data.displayName == null || (data.displayName is string && data.displayName.size() <= 120)) &&
+             (!('photoURL' in data) || data.photoURL == null || (data.photoURL is string && data.photoURL.size() <= 1000));
+    }
+
+    // CBSE PYQ and Sample Papers collection (Publicly readable educational library)
+    match /cbse_pyqs/{paperId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isValidId(paperId) && isValidCbsePyq(incoming());
+      allow update: if isSignedIn() && isValidId(paperId) && isValidCbsePyq(incoming());
+      allow delete: if isSignedIn() && isValidId(paperId);
+    }
+
+    // User profiles (Isolated to document owner)
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidId(userId) && isValidUserProfile(incoming());
+      allow update: if isOwner(userId) && isValidId(userId) && isValidUserProfile(incoming());
+      allow delete: if isOwner(userId);
+    }
+
+    // Connection test document
+    match /test/{docId} {
+      allow read: if true;
+    }
+  }
+}

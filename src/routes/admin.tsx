@@ -3,7 +3,8 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Page } from "@/components/site";
 import { PaperReader, type ReaderPaper } from "@/components/PaperReader";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/lib/firebase";
+import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import { addPaper, deletePaper, verifyAdmin } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/admin")({
@@ -55,11 +56,27 @@ function Admin() {
   const [view, setView] = useState<ReaderPaper | null>(null);
 
   const load = useCallback(async () => {
-    const { data } = await supabase
-      .from("cbse_pyqs")
-      .select("*")
-      .order("created_at", { ascending: false });
-    setRows((data as Row[]) ?? []);
+    try {
+      const q = query(collection(db, "cbse_pyqs"), orderBy("year", "desc"));
+      const snapshot = await getDocs(q);
+      const items: Row[] = snapshot.docs.map((d) => {
+        const val = d.data();
+        return {
+          id: d.id,
+          standard: String(val["standard"] || "10"),
+          subject: String(val["subject"] || ""),
+          year: String(val["year"] || ""),
+          paper_type: String(val["paper_type"] || "Board Paper"),
+          set_number: val["set_number"] ? String(val["set_number"]) : null,
+          paper_url: String(val["paper_url"] || ""),
+          solution_url: val["solution_url"] ? String(val["solution_url"]) : null,
+        };
+      });
+      setRows(items);
+    } catch (err) {
+      console.error("Firestore error loading papers:", err);
+      toast.error("Failed to load papers from Firestore");
+    }
   }, []);
   useEffect(() => {
     if (ok) load();

@@ -1,7 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { GoogleGenAI } from "@google/genai";
-import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
-import { streamText } from "ai";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -10,12 +8,11 @@ export const Route = createFileRoute("/api/tutor")({
     handlers: {
       POST: async ({ request }) => {
         const geminiKey = process.env["GEMINI_API_KEY"];
-        const lovableKey = process.env["LOVABLE_API_KEY"];
 
         const { mode, messages } = (await request.json()) as { mode: string; messages: Msg[] };
         const systemPrompt = `You are TOPIT, a friendly AI tutor for Indian school students (Classes 9-12, CBSE/ICSE/State boards). Current mode: "${String(mode).slice(0, 40)}". Follow that mode: e.g. Explain Simply = short plain words; Create Quiz/Test Me = numbered questions with options, answers at the end; Check My Answer = grade and correct; Make Revision Notes = crisp bullet points. Stay on school topics. Use plain text and simple bullets, no markdown headings.`;
 
-        // Case 1: Gemini API Key available
+        // Live Gemini API Key available
         if (geminiKey) {
           try {
             const ai = new GoogleGenAI({ apiKey: geminiKey });
@@ -56,30 +53,10 @@ export const Route = createFileRoute("/api/tutor")({
             });
           } catch (err) {
             console.error("Gemini stream error:", err);
-            // Fall through to other providers or graceful response
           }
         }
 
-        // Case 2: Lovable Gateway API Key available
-        if (lovableKey) {
-          const provider = createOpenAICompatible({
-            name: "lovable",
-            baseURL: "https://ai.gateway.lovable.dev/v1",
-            headers: { "Lovable-API-Key": lovableKey, "X-Lovable-AIG-SDK": "vercel-ai-sdk" },
-          });
-          const result = streamText({
-            model: provider("google/gemini-2.5-flash"),
-            maxRetries: 0,
-            abortSignal: request.signal,
-            system: systemPrompt,
-            messages: (messages ?? [])
-              .slice(-20)
-              .map((m) => ({ role: m.role, content: String(m.content).slice(0, 4000) })),
-          });
-          return result.toTextStreamResponse();
-        }
-
-        // Case 3: Offline / simulated response when no API key is provided
+        // Offline / simulated response when no API key is provided
         const lastUserMsg =
           messages?.filter((m) => m.role === "user").pop()?.content || "the question";
         const fallbackText = `👋 Hello! I am TOPIT AI Tutor.\n\nMode: ${mode}\nTopic: "${lastUserMsg}"\n\n📌 Quick Concept Overview:\n• Review key definitions and formulas in NCERT.\n• Solve previous 5 years' question papers (available in the Papers tab).\n• Practice stepwise derivations and diagram labeling.\n\n💡 Note: To enable live real-time AI responses, configure GEMINI_API_KEY in your environment.`;

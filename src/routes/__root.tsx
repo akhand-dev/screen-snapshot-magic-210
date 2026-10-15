@@ -11,10 +11,10 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Header, Footer } from "@/components/site";
 import { Toaster } from "@/components/ui/sonner";
 import { AdsterraBanner } from "@/components/AdsterraBanner";
+import { AuthProvider } from "@/hooks/useAuth";
 
 function NotFoundComponent() {
   return (
@@ -34,11 +34,8 @@ function NotFoundComponent() {
 }
 
 function ErrorComponent({ error, reset }: ErrorComponentProps) {
-  console.error(error);
+  console.error("Root route error:", error);
   const router = useRouter();
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="max-w-md text-center">
@@ -102,20 +99,22 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="bg-page min-h-screen">
-        <div className="pointer-events-none fixed inset-0 overflow-hidden">
-          <div className="absolute -top-32 -left-24 size-[420px] rounded-full bg-brand/25 blur-[110px]" />
-          <div className="absolute top-40 -right-28 size-[460px] rounded-full bg-sky/25 blur-[120px]" />
-          <div className="absolute bottom-0 left-1/3 size-[380px] rounded-full bg-brand2/20 blur-[120px]" />
+      <AuthProvider>
+        <div className="bg-page min-h-screen">
+          <div className="pointer-events-none fixed inset-0 overflow-hidden">
+            <div className="absolute -top-32 -left-24 size-[420px] rounded-full bg-brand/25 blur-[110px]" />
+            <div className="absolute top-40 -right-28 size-[460px] rounded-full bg-sky/25 blur-[120px]" />
+            <div className="absolute bottom-0 left-1/3 size-[380px] rounded-full bg-brand2/20 blur-[120px]" />
+          </div>
+          <Header />
+          <Outlet />
+          <Toaster />
+          <div className="relative z-10 px-4 pt-6">
+            <AdsterraBanner />
+          </div>
+          <Footer />
         </div>
-        <Header />
-        <Outlet />
-        <Toaster />
-        <div className="relative z-10 px-4 pt-6">
-          <AdsterraBanner />
-        </div>
-        <Footer />
-      </div>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

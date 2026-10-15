@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
+import { db } from "@/lib/firebase";
+import { collection, addDoc, doc, deleteDoc } from "firebase/firestore";
 
-// Passcode is checked on the server so the browser can never write to the table directly.
+// Passcode is checked on the server so unauthorized users cannot write directly.
 function checkPass(pass: string) {
   const expected = process.env["ADMIN_PASSCODE"] || "admin123";
   if (pass !== expected) throw new Error("Wrong passcode");
@@ -39,8 +41,7 @@ export const addPaper = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     checkPass(data.pass);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("cbse_pyqs").insert({
+    const docRef = await addDoc(collection(db, "cbse_pyqs"), {
       standard: data.standard,
       subject: data.subject.trim(),
       year: data.year.trim(),
@@ -48,17 +49,15 @@ export const addPaper = createServerFn({ method: "POST" })
       set_number: data.set_number.trim() || null,
       paper_url: data.paper_url.trim(),
       solution_url: data.solution_url.trim() || null,
+      created_at: new Date().toISOString(),
     });
-    if (error) throw new Error(error.message);
-    return { ok: true };
+    return { ok: true, id: docRef.id };
   });
 
 export const deletePaper = createServerFn({ method: "POST" })
   .inputValidator((d: { pass: string; id: string }) => d)
   .handler(async ({ data }) => {
     checkPass(data.pass);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("cbse_pyqs").delete().eq("id", data.id);
-    if (error) throw new Error(error.message);
+    await deleteDoc(doc(db, "cbse_pyqs", data.id));
     return { ok: true };
   });

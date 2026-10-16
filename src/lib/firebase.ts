@@ -1,42 +1,12 @@
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, type Auth } from "firebase/auth";
 import { getFirestore, doc, getDocFromServer, type Firestore } from "firebase/firestore";
-import firebaseConfigJson from "../../firebase-applet-config.json";
+import firebaseConfig from "../../firebase-applet-config.json";
 
-// Fallback configuration if env vars are preferred
-const config = {
-  projectId:
-    import.meta.env.VITE_FIREBASE_PROJECT_ID ||
-    process.env.FIREBASE_PROJECT_ID ||
-    firebaseConfigJson.projectId,
-  appId:
-    import.meta.env.VITE_FIREBASE_APP_ID || process.env.FIREBASE_APP_ID || firebaseConfigJson.appId,
-  apiKey:
-    import.meta.env.VITE_FIREBASE_API_KEY ||
-    process.env.FIREBASE_API_KEY ||
-    firebaseConfigJson.apiKey,
-  authDomain:
-    import.meta.env.VITE_FIREBASE_AUTH_DOMAIN ||
-    process.env.FIREBASE_AUTH_DOMAIN ||
-    firebaseConfigJson.authDomain,
-  firestoreDatabaseId:
-    import.meta.env.VITE_FIREBASE_FIRESTORE_DATABASE_ID ||
-    process.env.FIREBASE_FIRESTORE_DATABASE_ID ||
-    firebaseConfigJson.firestoreDatabaseId,
-  storageBucket:
-    import.meta.env.VITE_FIREBASE_STORAGE_BUCKET ||
-    process.env.FIREBASE_STORAGE_BUCKET ||
-    firebaseConfigJson.storageBucket,
-  messagingSenderId:
-    import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID ||
-    process.env.FIREBASE_MESSAGING_SENDER_ID ||
-    firebaseConfigJson.messagingSenderId,
-};
-
-export const app: FirebaseApp = getApps().length > 0 ? getApp() : initializeApp(config);
+export const app: FirebaseApp = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
 /* CRITICAL: Passing firestoreDatabaseId is mandatory for provisioned Firestore instances */
-export const db: Firestore = getFirestore(app, config.firestoreDatabaseId);
+export const db: Firestore = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 export const auth: Auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 

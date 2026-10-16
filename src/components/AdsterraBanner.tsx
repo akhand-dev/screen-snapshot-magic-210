@@ -1,252 +1,198 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
-interface AdsterraLeaderboardProps {
+interface AdsterraProps {
   className?: string;
   showLabel?: boolean;
 }
 
-interface AdsterraMobileBannerProps {
-  className?: string;
-  showLabel?: boolean;
+const AD_CONFIG_728X90 = {
+  key: "329ec398cfd98cca6de8b31af412a0ae",
+  format: "iframe",
+  height: 90,
+  width: 728,
+  url: "https://www.highrevenueformat.com/329ec398cfd98cca6de8b31af412a0ae/invoke.js",
+};
+
+const AD_CONFIG_320X50 = {
+  key: "d475729d8709db61ab24a1caf5d55711",
+  format: "iframe",
+  height: 50,
+  width: 320,
+  url: "https://www.highrevenueformat.com/d475729d8709db61ab24a1caf5d55711/invoke.js",
+};
+
+/**
+ * Adsterra 728x90 Leaderboard Banner
+ *
+ * Fixes applied:
+ * 1. Strict HTTPS URL: "https://www.highrevenueformat.com/..." (no protocol-relative //)
+ * 2. React 18 / Next.js Strict Mode resilient: Does NOT wipe container.innerHTML on cleanup,
+ *    allowing in-flight 307 redirects and iframe rendering to complete without being aborted.
+ * 3. Explicit invokeScript.async = true for fast, non-blocking execution.
+ * 4. Fixed CSS styling (width: 728px, height: 90px, min-height: 90px, margin: 0 auto, overflow: hidden)
+ *    to completely eliminate Cumulative Layout Shift (CLS).
+ * 5. Zero ad blocker fallback text or overlays.
+ */
+export function AdsterraLeaderboard({ className = "", showLabel = false }: AdsterraProps) {
+  const bannerRef = useRef<HTMLDivElement>(null);
+  const isLoadedRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    const container = bannerRef.current;
+    if (!container) return;
+
+    // Prevent double-injection during React 18 Strict Mode double mounts
+    if (isLoadedRef.current || container.children.length > 0) {
+      return;
+    }
+
+    isLoadedRef.current = true;
+
+    try {
+      // 1. Configuration script defining atOptions
+      const confScript = document.createElement("script");
+      confScript.type = "text/javascript";
+      confScript.text = `atOptions = {
+        'key' : '${AD_CONFIG_728X90.key}',
+        'format' : '${AD_CONFIG_728X90.format}',
+        'height' : ${AD_CONFIG_728X90.height},
+        'width' : ${AD_CONFIG_728X90.width},
+        'params' : {}
+      };`;
+
+      // 2. External invoke script with explicit HTTPS and async = true
+      const invokeScript = document.createElement("script");
+      invokeScript.type = "text/javascript";
+      invokeScript.src = AD_CONFIG_728X90.url;
+      invokeScript.async = true;
+
+      container.appendChild(confScript);
+      container.appendChild(invokeScript);
+    } catch (err) {
+      console.error("[Adsterra 728x90] Injection error:", err);
+    }
+
+    // NOTE: In React 18 Strict Mode, DO NOT wipe container.innerHTML on unmount.
+    // Wiping innerHTML aborts in-flight 307 redirects and kills the Adsterra iframe.
+  }, []);
+
+  return (
+    <div className={`flex flex-col items-center justify-center py-4 ${className}`}>
+      {showLabel && (
+        <span className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
+          Advertisement
+        </span>
+      )}
+      <div
+        style={{
+          width: "728px",
+          height: "90px",
+          minHeight: "90px",
+          margin: "0 auto",
+          overflow: "hidden",
+        }}
+        className="max-w-full flex items-center justify-center"
+      >
+        <div
+          ref={bannerRef}
+          style={{
+            width: "728px",
+            height: "90px",
+            minHeight: "90px",
+            overflow: "hidden",
+          }}
+          className="flex items-center justify-center"
+        />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Adsterra 320x50 Mobile Banner
+ */
+export function AdsterraMobileBanner({ className = "", showLabel = false }: AdsterraProps) {
+  const bannerRef = useRef<HTMLDivElement>(null);
+  const isLoadedRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    const container = bannerRef.current;
+    if (!container) return;
+
+    if (isLoadedRef.current || container.children.length > 0) {
+      return;
+    }
+
+    isLoadedRef.current = true;
+
+    try {
+      const confScript = document.createElement("script");
+      confScript.type = "text/javascript";
+      confScript.text = `atOptions = {
+        'key' : '${AD_CONFIG_320X50.key}',
+        'format' : '${AD_CONFIG_320X50.format}',
+        'height' : ${AD_CONFIG_320X50.height},
+        'width' : ${AD_CONFIG_320X50.width},
+        'params' : {}
+      };`;
+
+      const invokeScript = document.createElement("script");
+      invokeScript.type = "text/javascript";
+      invokeScript.src = AD_CONFIG_320X50.url;
+      invokeScript.async = true;
+
+      container.appendChild(confScript);
+      container.appendChild(invokeScript);
+    } catch (err) {
+      console.error("[Adsterra 320x50] Injection error:", err);
+    }
+  }, []);
+
+  return (
+    <div className={`flex flex-col items-center justify-center py-4 ${className}`}>
+      {showLabel && (
+        <span className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
+          Advertisement
+        </span>
+      )}
+      <div
+        style={{
+          width: "320px",
+          height: "50px",
+          minHeight: "50px",
+          margin: "0 auto",
+          overflow: "hidden",
+        }}
+        className="max-w-full flex items-center justify-center"
+      >
+        <div
+          ref={bannerRef}
+          style={{
+            width: "320px",
+            height: "50px",
+            minHeight: "50px",
+            overflow: "hidden",
+          }}
+          className="flex items-center justify-center"
+        />
+      </div>
+    </div>
+  );
 }
 
 export type AdSize = "auto" | "320x50" | "728x90";
 
-interface AdsterraBannerProps {
-  className?: string;
-  showLabel?: boolean;
+interface AdsterraBannerProps extends AdsterraProps {
   size?: AdSize;
-}
-
-// Strict hardcoded HTTPS endpoints
-const HTTPS_LEADERBOARD_URL =
-  "https://www.highrevenueformat.com/329ec398cfd98cca6de8b31af412a0ae/invoke.js";
-const HTTPS_MOBILE_URL =
-  "https://www.highrevenueformat.com/d475729d8709db61ab24a1caf5d55711/invoke.js";
-
-/**
- * Dedicated 728x90 Leaderboard Ad
- * Features:
- * 1. Explicit hardcoded HTTPS protocol to avoid redirect degradation.
- * 2. Pre-rendered fixed dimensions (728x90) preventing layout collapse during 307 redirects.
- * 3. Double-injection guard protecting in-flight redirect requests from fast React reconciliation.
- */
-export function AdsterraLeaderboard({
-  className = "",
-  showLabel = true,
-}: AdsterraLeaderboardProps) {
-  const slotRef = useRef<HTMLDivElement>(null);
-  const injectedRef = useRef<boolean>(false);
-  const [isBlocked, setIsBlocked] = useState(false);
-
-  useEffect(() => {
-    const slot = slotRef.current;
-    if (!slot) return;
-
-    // Check to prevent script double-injection during fast reconciliation / auth state re-renders
-    if (injectedRef.current || slot.getAttribute("data-adsterra-injected") === "true") {
-      return;
-    }
-
-    injectedRef.current = true;
-    slot.setAttribute("data-adsterra-injected", "true");
-
-    try {
-      // 1. Config script defining atOptions
-      const confScript = document.createElement("script");
-      confScript.type = "text/javascript";
-      confScript.text = `atOptions = {
-        'key' : '329ec398cfd98cca6de8b31af412a0ae',
-        'format' : 'iframe',
-        'height' : 90,
-        'width' : 728,
-        'params' : {}
-      };`;
-
-      // 2. Hardcoded strict HTTPS invoke script
-      const invokeScript = document.createElement("script");
-      invokeScript.type = "text/javascript";
-      invokeScript.src = HTTPS_LEADERBOARD_URL;
-      invokeScript.async = true;
-
-      invokeScript.onerror = () => {
-        console.warn("[Adsterra] 728x90 script failed to load or was blocked by an ad-blocker.");
-        setIsBlocked(true);
-      };
-
-      slot.appendChild(confScript);
-      slot.appendChild(invokeScript);
-    } catch (err) {
-      console.error("[Adsterra] Leaderboard injection error:", err);
-    }
-  }, []);
-
-  return (
-    <div
-      className={`mx-auto flex w-full max-w-5xl flex-col items-center justify-center py-4 ${className}`}
-    >
-      {showLabel && (
-        <span className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
-          Advertisement (728×90)
-        </span>
-      )}
-
-      {/* Pre-rendered exact dimensions (728px x 90px) to prevent container collapse during 307 redirects */}
-      <div
-        className="glass-soft relative flex items-center justify-center overflow-x-auto rounded-2xl border border-border/50 p-1.5 shadow-sm"
-        style={{
-          width: "740px",
-          maxWidth: "100%",
-          minHeight: "102px",
-        }}
-      >
-        <div
-          style={{
-            width: "728px",
-            height: "90px",
-            minWidth: "728px",
-            minHeight: "90px",
-          }}
-          className="flex items-center justify-center overflow-hidden"
-        >
-          {/* Isolated DOM node managed exclusively by useEffect */}
-          <div
-            ref={slotRef}
-            style={{
-              width: "728px",
-              height: "90px",
-              minWidth: "728px",
-              minHeight: "90px",
-            }}
-            className="flex items-center justify-center"
-          />
-        </div>
-
-        {isBlocked && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-card/90 p-2 text-center backdrop-blur-xs">
-            <span className="text-xs font-semibold text-amber">Ad Blocker Detected</span>
-            <p className="mt-0.5 text-[11px] text-muted-foreground">
-              highrevenueformat.com was blocked by a browser extension or Brave Shields.
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/**
- * Dedicated 320x50 Mobile Banner Ad
- */
-export function AdsterraMobileBanner({
-  className = "",
-  showLabel = true,
-}: AdsterraMobileBannerProps) {
-  const slotRef = useRef<HTMLDivElement>(null);
-  const injectedRef = useRef<boolean>(false);
-  const [isBlocked, setIsBlocked] = useState(false);
-
-  useEffect(() => {
-    const slot = slotRef.current;
-    if (!slot) return;
-
-    // Check to prevent double-injection during fast reconciliation
-    if (injectedRef.current || slot.getAttribute("data-adsterra-injected") === "true") {
-      return;
-    }
-
-    injectedRef.current = true;
-    slot.setAttribute("data-adsterra-injected", "true");
-
-    try {
-      const confScript = document.createElement("script");
-      confScript.type = "text/javascript";
-      confScript.text = `atOptions = {
-        'key' : 'd475729d8709db61ab24a1caf5d55711',
-        'format' : 'iframe',
-        'height' : 50,
-        'width' : 320,
-        'params' : {}
-      };`;
-
-      const invokeScript = document.createElement("script");
-      invokeScript.type = "text/javascript";
-      invokeScript.src = HTTPS_MOBILE_URL;
-      invokeScript.async = true;
-
-      invokeScript.onerror = () => {
-        console.warn("[Adsterra] 320x50 script failed to load or was blocked by an ad-blocker.");
-        setIsBlocked(true);
-      };
-
-      slot.appendChild(confScript);
-      slot.appendChild(invokeScript);
-    } catch (err) {
-      console.error("[Adsterra] Mobile banner injection error:", err);
-    }
-  }, []);
-
-  return (
-    <div
-      className={`mx-auto flex w-full max-w-sm flex-col items-center justify-center py-4 ${className}`}
-    >
-      {showLabel && (
-        <span className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
-          Advertisement (320×50)
-        </span>
-      )}
-
-      {/* Pre-rendered exact dimensions (320px x 50px) */}
-      <div
-        className="glass-soft relative flex items-center justify-center rounded-2xl border border-border/50 p-1.5 shadow-sm"
-        style={{
-          width: "332px",
-          maxWidth: "100%",
-          minHeight: "62px",
-        }}
-      >
-        <div
-          style={{
-            width: "320px",
-            height: "50px",
-            minWidth: "320px",
-            minHeight: "50px",
-          }}
-          className="flex items-center justify-center overflow-hidden"
-        >
-          <div
-            ref={slotRef}
-            style={{
-              width: "320px",
-              height: "50px",
-              minWidth: "320px",
-              minHeight: "50px",
-            }}
-            className="flex items-center justify-center"
-          />
-        </div>
-
-        {isBlocked && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-card/90 p-2 text-center backdrop-blur-xs">
-            <span className="text-xs font-semibold text-amber">Ad Blocker Detected</span>
-            <p className="mt-0.5 text-[11px] text-muted-foreground">
-              highrevenueformat.com was blocked by a browser extension.
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
 }
 
 /**
  * Responsive Adsterra Banner
- * Automatically displays the 728x90 Leaderboard on desktop (>=768px)
- * and the 320x50 Banner on mobile devices (<768px).
+ * Automatically displays 728x90 on desktop and 320x50 on mobile screens.
  */
 export function AdsterraBanner({
   className = "",
-  showLabel = true,
+  showLabel = false,
   size = "auto",
 }: AdsterraBannerProps) {
   if (size === "728x90") {
@@ -257,7 +203,6 @@ export function AdsterraBanner({
     return <AdsterraMobileBanner className={className} showLabel={showLabel} />;
   }
 
-  // Responsive mode: CSS-level display to ensure exact container dimensions
   return (
     <div className={`w-full ${className}`}>
       <div className="hidden md:block">

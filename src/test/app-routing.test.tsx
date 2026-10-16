@@ -13,5 +13,17 @@ describe("App routing", () => {
     const matches = router.matchRoutes("/");
 
     expect(matches.at(-1)?.routeId).not.toBe(rootRouteId);
+    expect(matches.at(-1)?.routeId).toBe("/");
+  });
+
+  it("matches key pages properly across the route tree", () => {
+    const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
+
+    const routesToTest = ["/tutor", "/practice", "/papers", "/pyqs", "/notes", "/analytics"];
+    for (const path of routesToTest) {
+      const matches = router.matchRoutes(path);
+      expect(matches.at(-1)?.routeId).not.toBe(rootRouteId);
+      expect(matches.at(-1)?.routeId).toBe(path);
+    }
   });
 });

@@ -62,9 +62,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "TOPIT — Prepare Smarter. Score Better." },
       { name: "description", content: "Board exam preparation ecosystem for Class 9–12." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://top-i.netlify.app" },
+      { property: "og:site_name", content: "TOPIT" },
+      { property: "og:title", content: "TOPIT — Prepare Smarter. Score Better." },
+      {
+        property: "og:description",
+        content: "Board exam preparation ecosystem for Class 9–12.",
+      },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:domain", content: "top-i.netlify.app" },
+      { name: "twitter:url", content: "https://top-i.netlify.app" },
     ],
     links: [
+      { rel: "canonical", href: "https://top-i.netlify.app" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {

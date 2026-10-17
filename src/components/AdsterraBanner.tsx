@@ -6,11 +6,11 @@ interface AdsterraProps {
 }
 
 const AD_CONFIG_728X90 = {
-  key: "329ec398cfd98cca6de8b31af412a0ae",
+  key: "adc80d9f75af763d0c8c5631759aec45",
   format: "iframe",
   height: 90,
   width: 728,
-  url: "https://www.highrevenueformat.com/329ec398cfd98cca6de8b31af412a0ae/invoke.js",
+  url: "https://www.highrevenueformat.com/adc80d9f75af763d0c8c5631759aec45/invoke.js",
 };
 
 const AD_CONFIG_320X50 = {

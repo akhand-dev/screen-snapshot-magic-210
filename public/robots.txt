@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://top-i.netlify.app/sitemap.xml
+Sitemap: https://topit.akhand2152.workers.dev/sitemap.xml

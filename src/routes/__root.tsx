@@ -62,7 +62,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "TOPIT — Prepare Smarter. Score Better." },
       { name: "description", content: "Board exam preparation ecosystem for Class 9–12." },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://top-i.netlify.app" },
+      { property: "og:url", content: "https://topit.akhand2152.workers.dev" },
       { property: "og:site_name", content: "TOPIT" },
       { property: "og:title", content: "TOPIT — Prepare Smarter. Score Better." },
       {
@@ -70,11 +70,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content: "Board exam preparation ecosystem for Class 9–12.",
       },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:domain", content: "top-i.netlify.app" },
-      { name: "twitter:url", content: "https://top-i.netlify.app" },
+      { name: "twitter:domain", content: "topit.akhand2152.workers.dev" },
+      { name: "twitter:url", content: "https://topit.akhand2152.workers.dev" },
     ],
     links: [
-      { rel: "canonical", href: "https://top-i.netlify.app" },
+      { rel: "canonical", href: "https://topit.akhand2152.workers.dev" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {

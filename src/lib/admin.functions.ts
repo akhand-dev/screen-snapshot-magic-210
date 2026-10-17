@@ -9,7 +9,7 @@ function checkPass(pass: string) {
 }
 
 export const verifyAdmin = createServerFn({ method: "POST" })
-  .inputValidator((d: { pass: string }) => d)
+  .validator((d: { pass: string }) => d)
   .handler(async ({ data }) => {
     checkPass(data.pass);
     return { ok: true };
@@ -29,7 +29,7 @@ type NewPaper = {
 const isUrl = (u: string) => /^https?:\/\/\S+$/i.test(u);
 
 export const addPaper = createServerFn({ method: "POST" })
-  .inputValidator((d: NewPaper) => {
+  .validator((d: NewPaper) => {
     if (!["10", "12"].includes(d.standard)) throw new Error("Invalid class");
     if (!["Board Paper", "SQP"].includes(d.paper_type)) throw new Error("Invalid type");
     if (!d.subject.trim() || d.subject.length > 100) throw new Error("Subject required");
@@ -55,7 +55,7 @@ export const addPaper = createServerFn({ method: "POST" })
   });
 
 export const deletePaper = createServerFn({ method: "POST" })
-  .inputValidator((d: { pass: string; id: string }) => d)
+  .validator((d: { pass: string; id: string }) => d)
   .handler(async ({ data }) => {
     checkPass(data.pass);
     await deleteDoc(doc(db, "cbse_pyqs", data.id));

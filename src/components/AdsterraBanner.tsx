@@ -188,21 +188,34 @@ export function AdsterraBanner({
   showLabel = false,
   size = "auto",
 }: AdsterraBannerProps) {
-  const [isMobile, setIsMobile] = useState<boolean>(() => {
-    if (typeof window !== "undefined") {
-      return window.innerWidth < 768;
-    }
-    return false;
-  });
+  const [mounted, setMounted] = useState<boolean>(false);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
 
   useEffect(() => {
+    setMounted(true);
+    setIsMobile(window.innerWidth < 768);
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  if (!mounted) {
+    return (
+      <div
+        className={`flex items-center justify-center py-4 ${className}`}
+        style={{
+          width: "728px",
+          maxWidth: "100%",
+          height: "90px",
+          minHeight: "90px",
+          margin: "0 auto",
+          overflow: "hidden",
+        }}
+      />
+    );
+  }
 
   if (size === "728x90" || (size === "auto" && !isMobile)) {
     return <AdsterraLeaderboard className={className} showLabel={showLabel} />;

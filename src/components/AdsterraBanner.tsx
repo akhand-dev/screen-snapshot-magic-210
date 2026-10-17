@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface AdsterraProps {
   className?: string;
@@ -23,15 +23,10 @@ const AD_CONFIG_320X50 = {
 
 /**
  * Adsterra 728x90 Leaderboard Banner
- *
- * Fixes applied:
- * 1. Strict HTTPS URL: "https://www.highrevenueformat.com/..." (no protocol-relative //)
- * 2. React 18 / Next.js Strict Mode resilient: Does NOT wipe container.innerHTML on cleanup,
- *    allowing in-flight 307 redirects and iframe rendering to complete without being aborted.
- * 3. Explicit invokeScript.async = true for fast, non-blocking execution.
- * 4. Fixed CSS styling (width: 728px, height: 90px, min-height: 90px, margin: 0 auto, overflow: hidden)
- *    to completely eliminate Cumulative Layout Shift (CLS).
- * 5. Zero ad blocker fallback text or overlays.
+ * - Uses document-ordered script injection (async = false) so Adsterra can locate document.currentScript
+ * - Fixed 728x90 container to eliminate Cumulative Layout Shift (CLS)
+ * - Strict HTTPS URL
+ * - Protected against double mounting
  */
 export function AdsterraLeaderboard({ className = "", showLabel = false }: AdsterraProps) {
   const bannerRef = useRef<HTMLDivElement>(null);
@@ -41,7 +36,6 @@ export function AdsterraLeaderboard({ className = "", showLabel = false }: Adste
     const container = bannerRef.current;
     if (!container) return;
 
-    // Prevent double-injection during React 18 Strict Mode double mounts
     if (isLoadedRef.current || container.children.length > 0) {
       return;
     }
@@ -60,20 +54,18 @@ export function AdsterraLeaderboard({ className = "", showLabel = false }: Adste
         'params' : {}
       };`;
 
-      // 2. External invoke script with explicit HTTPS and async = true
+      // 2. External invoke script
+      // async = false ensures execution in exact DOM order so document.currentScript is preserved
       const invokeScript = document.createElement("script");
       invokeScript.type = "text/javascript";
       invokeScript.src = AD_CONFIG_728X90.url;
-      invokeScript.async = true;
+      invokeScript.async = false;
 
       container.appendChild(confScript);
       container.appendChild(invokeScript);
     } catch (err) {
       console.error("[Adsterra 728x90] Injection error:", err);
     }
-
-    // NOTE: In React 18 Strict Mode, DO NOT wipe container.innerHTML on unmount.
-    // Wiping innerHTML aborts in-flight 307 redirects and kills the Adsterra iframe.
   }, []);
 
   return (
@@ -139,7 +131,7 @@ export function AdsterraMobileBanner({ className = "", showLabel = false }: Adst
       const invokeScript = document.createElement("script");
       invokeScript.type = "text/javascript";
       invokeScript.src = AD_CONFIG_320X50.url;
-      invokeScript.async = true;
+      invokeScript.async = false;
 
       container.appendChild(confScript);
       container.appendChild(invokeScript);
@@ -188,31 +180,35 @@ interface AdsterraBannerProps extends AdsterraProps {
 
 /**
  * Responsive Adsterra Banner
- * Automatically displays 728x90 on desktop and 320x50 on mobile screens.
+ * Mounts ONLY one banner variant (728x90 on desktop, 320x50 on mobile)
+ * to prevent global window.atOptions collisions between concurrent scripts.
  */
 export function AdsterraBanner({
   className = "",
   showLabel = false,
   size = "auto",
 }: AdsterraBannerProps) {
-  if (size === "728x90") {
+  const [isMobile, setIsMobile] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      return window.innerWidth < 768;
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  if (size === "728x90" || (size === "auto" && !isMobile)) {
     return <AdsterraLeaderboard className={className} showLabel={showLabel} />;
   }
 
-  if (size === "320x50") {
-    return <AdsterraMobileBanner className={className} showLabel={showLabel} />;
-  }
-
-  return (
-    <div className={`w-full ${className}`}>
-      <div className="hidden md:block">
-        <AdsterraLeaderboard showLabel={showLabel} />
-      </div>
-      <div className="block md:hidden">
-        <AdsterraMobileBanner showLabel={showLabel} />
-      </div>
-    </div>
-  );
+  return <AdsterraMobileBanner className={className} showLabel={showLabel} />;
 }
 
 export default AdsterraBanner;

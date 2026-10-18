@@ -86,7 +86,7 @@ export function AdsterraLeaderboard({ className = "", showLabel = false }: Adste
         <iframe
           key={reloadKey}
           title="Adsterra Leaderboard (728x90)"
-          src={`/ad-728x90.html?v=${reloadKey}`}
+          src={`/ad-728x90?v=${reloadKey}`}
           width="728"
           height="90"
           style={{

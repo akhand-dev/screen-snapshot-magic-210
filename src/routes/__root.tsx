@@ -100,6 +100,10 @@ function RootShell({ children }: { children: ReactNode }) {
       <body suppressHydrationWarning>
         {children}
         <Scripts />
+        <script
+          type="text/javascript"
+          src="https://pl31896902.profitableratecpmnetwork.com/72/2f/4c/722f4c34972fc8c1dfe5b26580821bb0.js"
+        />
       </body>
     </html>
   );

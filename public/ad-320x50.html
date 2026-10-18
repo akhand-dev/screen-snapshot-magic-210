@@ -21,15 +21,43 @@
   </style>
 </head>
 <body>
+  <!-- Fallback Smartlink Banner: displays immediately if ad blocker is active or script takes >1.5s -->
+  <a id="ad-fallback" href="https://www.profitableratecpmnetwork.com/t620i6dj6?key=f65901695c6f7334caa27dd74eb11c9c" target="_blank" rel="noopener noreferrer" style="display:none;width:320px;height:50px;background:linear-gradient(135deg,#6366f1,#0ea5e9);color:#fff;text-decoration:none;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;border-radius:10px;padding:0 12px;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(99,102,241,0.2);">
+    <div style="display:flex;align-items:center;gap:6px;overflow:hidden;">
+      <span style="font-size:9px;text-transform:uppercase;font-weight:700;background:rgba(255,255,255,0.25);padding:2px 5px;border-radius:4px;">Ad</span>
+      <span style="font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Board Study Materials &amp; Guides</span>
+    </div>
+    <span style="font-size:11px;font-weight:700;background:#ffffff;color:#4338ca;padding:4px 8px;border-radius:6px;white-space:nowrap;">Open &rarr;</span>
+  </a>
+
+  <!-- Adsterra 320x50 Banner Placement -->
   <script type="text/javascript">
     atOptions = {
       'key' : '24db24ac52baa4d83feb7aababed142e',
       'format' : 'iframe',
-      'height' : 90,
-      'width' : 728,
+      'height' : 50,
+      'width' : 320,
       'params' : {}
     };
   </script>
   <script type="text/javascript" src="https://www.highrevenueformat.com/24db24ac52baa4d83feb7aababed142e/invoke.js"></script>
+
+  <script type="text/javascript">
+    function checkRender() {
+      var iframes = document.querySelectorAll('iframe');
+      var imgs = document.querySelectorAll('img');
+      var links = document.querySelectorAll('a[href*="highrevenueformat"]');
+      if (iframes.length > 0 || imgs.length > 0 || links.length > 0) {
+        var fb = document.getElementById('ad-fallback');
+        if (fb) fb.style.display = 'none';
+        window.parent.postMessage({ type: 'adsterra-loaded', width: 320, height: 50 }, '*');
+      } else {
+        var fb = document.getElementById('ad-fallback');
+        if (fb) fb.style.display = 'flex';
+      }
+    }
+    setTimeout(checkRender, 1500);
+    setTimeout(checkRender, 3000);
+  </script>
 </body>
 </html>

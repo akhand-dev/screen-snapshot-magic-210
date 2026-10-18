@@ -7,6 +7,8 @@ interface AdsterraProps {
 }
 
 const AD_KEY_728X90 = "24db24ac52baa4d83feb7aababed142e";
+export const ADSTERRA_SMARTLINK =
+  "https://www.profitableratecpmnetwork.com/t620i6dj6?key=f65901695c6f7334caa27dd74eb11c9c";
 
 /**
  * Adsterra 728x90 Leaderboard Banner

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <base target="_blank">
+  <title>Advertisement</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: transparent;
+    }
+  </style>
+</head>
+<body>
+  <script type="text/javascript">
+    atOptions = {
+      'key' : '24db24ac52baa4d83feb7aababed142e',
+      'format' : 'iframe',
+      'height' : 90,
+      'width' : 728,
+      'params' : {}
+    };
+  </script>
+  <script type="text/javascript" src="https://www.highrevenueformat.com/24db24ac52baa4d83feb7aababed142e/invoke.js"></script>
+  <script type="text/javascript">
+    // Post message to parent when creative is injected
+    function checkRender() {
+      var iframes = document.querySelectorAll('iframe');
+      var imgs = document.querySelectorAll('img');
+      var links = document.querySelectorAll('a');
+      if (iframes.length > 0 || imgs.length > 0 || links.length > 0) {
+        window.parent.postMessage({ type: 'adsterra-loaded', width: 728, height: 90 }, '*');
+      }
+    }
+    setTimeout(checkRender, 1500);
+    setTimeout(checkRender, 3000);
+  </script>
+</body>
+</html>
